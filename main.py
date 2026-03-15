@@ -198,7 +198,6 @@ def generate_dsa_keys_api():
     try:
         priv_pem, pub_pem = generate_dsa_keys(2048)
 
-
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
             zip_file.writestr("dsa_private_key.pem", priv_pem)
