@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна 1</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .constants-box { background: #e9ecef; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-family: monospace; font-size: 16px; }
+        .input-group { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        input { padding: 10px; width: 60%; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 12px; width: 100%; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; border-left: 4px solid #007BFF; }
+        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <a href="/">Повернутися на головну</a>
+
+    <div class="card">
+        <h2>Генератор псевдовипадкових чисел</h2>
+
+        <div class="constants-box">
+            <strong>Параметри:</strong><br>
+            M = 2^14 - 1<br>
+            A = 6^5<br>
+            C = 5<br>
+            X0 = 32
+        </div>
+
+        <div class="input-group">
+            <label><strong>Введіть кількість чисел (N):</strong></label>
+            <input type="number" id="count" value="10000">
+        </div>
+
+        <button onclick="runLab()">Обчислити</button>
+    </div>
+
+    <div class="card" id="results" style="display: none;">
+        <h3>Звіт роботи:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        async function runLab() {
+            const btn = document.querySelector('button');
+            btn.innerText = "Обчислюється...";
+            btn.disabled = true;
+
+            const payload = {
+                count: parseInt(document.getElementById('count').value)
+            };
+
+            try {
+                const res = await fetch('/api/lab1/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const errData = await res.json();
+                    console.error("Помилка", errData);
+                    return;
+                }
+
+                const data = await res.json();
+
+                let report = `Згенеровано чисел: ${data.total_generated}\n`;
+                report += `Період генератора: ${data.period}\n\n`;
+                report += `ТЕСТУВАННЯ (Теорема Чезаро):\n`;
+                report += `   - Оцінка Пі (Власний алгоритм): ${data.pi_custom}\n`;
+                report += `   - Оцінка Пі (Системний): ${data.pi_sys}\n`;
+                report += `   - Реальне Пі:            ${data.pi_real}\n\n`;
+
+                document.getElementById('output').innerText = report;
+                document.getElementById('results').style.display = 'block';
+            } catch (error) {
+                alert("Помилка з'єднання з сервером!");
+            } finally {
+                btn.innerText = "Обчислити";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна 2 - MD5</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        input[type="text"], input[type="file"] { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; margin-top: 5px; }
+        button { padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; border-left: 4px solid #007BFF; }
+        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <a href="/">Повернутися на головну</a>
+
+    <div class="card">
+        <h2>Алгоритм хешування MD5</h2>
+
+        <div class="input-group">
+            <label><strong>Хешування тексту:</strong></label>
+            <input type="text" id="customText" placeholder="Введіть текст">
+            <button onclick="hashText()">Отримати хеш</button>
+        </div>
+
+       <div class="input-group">
+            <label><strong>Хешування файлу:</strong></label>
+            <input type="file" id="fileInput">
+            <button onclick="hashFile()">Отримати хеш файлу</button>
+        </div>
+
+        <div class="input-group">
+            <label><strong>Перевірка цілісності за файлом-хешем:</strong></label>
+            <input type="file" id="targetFile" title="Оберіть файл для перевірки">
+            <input type="file" id="hashFile" title="Оберіть файл .txt із MD5 хешем">
+            <button onclick="verifyWithHashFile()">Перевірити цілісність</button>
+        </div>
+
+        <button onclick="runTests()" style="background: #28a745;">Запустити стандартні тести</button>
+    </div>
+
+    <div class="card" id="results" style="display: none;">
+        <h3>Результат:</h3>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        async function hashText() {
+            const text = document.getElementById('customText').value;
+            const res = await fetch('/api/lab2/hash_text', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const data = await res.json();
+            displayResult(`Текст: ${data.text}\nMD5: ${data.hash}`);
+        }
+
+       async function hashFile() {
+            const fileInput = document.getElementById('fileInput').files[0];
+
+            if (!fileInput) return alert('Оберіть файл');
+
+            const formData = new FormData();
+            formData.append('file', fileInput);
+
+            const res = await fetch('/api/lab2/hash_file', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            let out = `Файл: ${data.filename}\nОбчислений хеш: ${data.hash}\n`;
+            displayResult(out);
+        }
+
+        async function runTests() {
+            const res = await fetch('/api/lab2/run_tests', { method: 'POST' });
+            const data = await res.json();
+            displayResult(`Результати тестів збережено у файл.\n\n${data.results.join('\n')}`);
+        }
+
+        function displayResult(content) {
+            document.getElementById('output').innerText = content;
+            document.getElementById('results').style.display = 'block';
+        }
+        async function verifyWithHashFile() {
+            const target = document.getElementById('targetFile').files[0];
+            const hashFile = document.getElementById('hashFile').files[0];
+
+            if (!target || !hashFile) return alert('Оберіть обидва файли: сам файл та файл з його хешем!');
+
+            const formData = new FormData();
+            formData.append('target_file', target);
+            formData.append('hash_file', hashFile);
+
+            const res = await fetch('/api/lab2/verify_with_file', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            let out = `Файл: ${data.filename}\n`;
+            out += `Обчислений хеш: ${data.calculated_hash}\n`;
+            out += `Хеш із файлу:   ${data.expected_hash}\n`;
+            out += `Цілісність:     ${data.is_valid ? 'ПІДТВЕРДЖЕНО (Збігається)' : 'ПОРУШЕНО (Не збігається)'}`;
+            displayResult(out);
+        }
+    </script>
+</body>
+</html>

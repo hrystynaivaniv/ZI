@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна 3 - RC5</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        input, select { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; margin-top: 5px; }
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+        button { padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; }
+        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <a href="/">Повернутися на головну</a>
+
+    <div class="card">
+        <h2>Алгоритм шифрування RC5</h2>
+
+        <div class="row">
+            <div class="input-group">
+                <label>Довжина слова (w):</label>
+                <select id="paramW">
+                    <option value="16">16 біт</option>
+                    <option value="32" selected>32 біти</option>
+                    <option value="64">64 біти</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Раунди (r):</label>
+                <input type="number" id="paramR" value="12">
+            </div>
+            <div class="input-group">
+                <label>Довжина ключа (b):</label>
+                <input type="number" id="paramB" value="16" title="в байтах">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Пароль:</label>
+            <input type="password" id="password" placeholder="Введіть парольну фразу">
+        </div>
+
+        <div class="input-group">
+            <label>Файл:</label>
+            <input type="file" id="fileInput">
+        </div>
+
+        <div class="row">
+            <button onclick="processFile('encrypt')">Шифрувати</button>
+            <button onclick="processFile('decrypt')" style="background: #28a745;">Дешифрувати</button>
+        </div>
+    </div>
+
+    <div class="card" id="results" style="display: none;">
+        <h3>Результат:</h3>
+        <pre id="output"></pre>
+        <a id="downloadLink" style="display: none; background: #17a2b8; color: white; padding: 10px; border-radius: 5px; text-align: center;">Завантажити результат</a>
+    </div>
+
+    <script>
+        async function processFile(action) {
+            const fileInput = document.getElementById('fileInput').files[0];
+            const pwd = document.getElementById('password').value;
+            const w = document.getElementById('paramW').value;
+            const r = document.getElementById('paramR').value;
+            const b = document.getElementById('paramB').value;
+
+            if (!fileInput || !pwd) return alert('Оберіть файл та введіть пароль!');
+
+            const formData = new FormData();
+            formData.append('file', fileInput);
+            formData.append('pwd', pwd);
+            formData.append('w', w);
+            formData.append('r', r);
+            formData.append('b', b);
+            formData.append('action', action);
+
+            const res = await fetch('/api/lab3/process', { method: 'POST', body: formData });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.getElementById('downloadLink');
+                a.href = url;
+                a.download = (action === 'encrypt' ? 'enc_' : 'dec_') + fileInput.name;
+                a.style.display = 'block';
+                document.getElementById('output').innerText = `Успішно! Файл готовий до завантаження.`;
+                document.getElementById('results').style.display = 'block';
+            } else {
+                alert('Помилка обробки файлу. Перевірте пароль та параметри.');
+            }
+        }
+    </script>
+</body>
+</html>

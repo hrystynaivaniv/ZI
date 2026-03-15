@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна 5 - Цифровий підпис (DSA)</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; margin-top: 5px; }
+        button { padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; width: 100%; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        #verifyResult { margin-top: 15px; padding: 15px; border-radius: 5px; display: none; font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+    <a href="/">Повернутися на головну</a>
+
+    <div class="card">
+        <h2>Крок 1: Генерація ключів DSA</h2>
+        <button onclick="generateDsaKeys()">Завантажити ключі (ZIP)</button>
+    </div>
+
+    <div class="card">
+        <h2>Крок 2: Підписати файл</h2>
+        <div class="input-group">
+            <label>Файл для підпису:</label>
+            <input type="file" id="signDataFile">
+        </div>
+        <div class="input-group">
+            <label>Приватний ключ (dsa_private_key.pem):</label>
+            <input type="file" id="signKeyFile">
+        </div>
+        <button onclick="signFile()">Отримати файл підпису (.sig)</button>
+    </div>
+
+    <div class="card">
+        <h2>Крок 3: Перевірити підпис</h2>
+        <div class="input-group">
+            <label>Оригінальний файл:</label>
+            <input type="file" id="verifyDataFile">
+        </div>
+        <div class="input-group">
+            <label>Файл підпису (.sig):</label>
+            <input type="file" id="verifySigFile">
+        </div>
+        <div class="input-group">
+            <label>Публічний ключ (dsa_public_key.pem):</label>
+            <input type="file" id="verifyKeyFile">
+        </div>
+        <button class="btn-success" onclick="verifyFile()">Перевірити достовірність</button>
+        <div id="verifyResult"></div>
+    </div>
+
+    <script>
+        async function generateDsaKeys() {
+            const res = await fetch('/api/lab5/generate_keys', { method: 'POST' });
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'dsa_keys.zip';
+                a.click();
+            }
+        }
+
+        async function signFile() {
+            const dataFile = document.getElementById('signDataFile').files[0];
+            const keyFile = document.getElementById('signKeyFile').files[0];
+            if (!dataFile || !keyFile) return alert('Оберіть файл та приватний ключ!');
+
+            const formData = new FormData();
+            formData.append('file', dataFile);
+            formData.append('key_file', keyFile);
+
+            const res = await fetch('/api/lab5/sign', { method: 'POST', body: formData });
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = dataFile.name + '.sig';
+                a.click();
+            } else alert(await res.text());
+        }
+
+        async function verifyFile() {
+            const dataFile = document.getElementById('verifyDataFile').files[0];
+            const sigFile = document.getElementById('verifySigFile').files[0];
+            const keyFile = document.getElementById('verifyKeyFile').files[0];
+            if (!dataFile || !sigFile || !keyFile) return alert('Оберіть всі три файли!');
+
+            const formData = new FormData();
+            formData.append('file', dataFile);
+            formData.append('sig_file', sigFile);
+            formData.append('key_file', keyFile);
+
+            const res = await fetch('/api/lab5/verify', { method: 'POST', body: formData });
+            const result = await res.json();
+
+            const resultDiv = document.getElementById('verifyResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerText = result.message;
+
+            if (result.status === 'success') {
+                resultDiv.style.backgroundColor = '#d4edda';
+                resultDiv.style.color = '#155724';
+            } else {
+                resultDiv.style.backgroundColor = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+            }
+        }
+    </script>
+</body>
+</html>

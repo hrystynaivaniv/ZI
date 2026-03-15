@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Лабораторна 4 - RSA</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+        .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; margin-top: 5px; }
+        .row { display: flex; gap: 10px; }
+        button { padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; width: 100%; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <a href="/">Повернутися на головну</a>
+
+    <div class="card">
+        <h2>Крок 1: Генерація ключів RSA</h2>
+        <p>Натисніть кнопку, щоб згенерувати пару ключів (Public та Private). Вони будуть завантажені у ZIP-архіві.</p>
+        <button onclick="generateKeys()">Згенерувати та завантажити ключі</button>
+    </div>
+
+    <div class="card">
+        <h2>Крок 2: Шифрування / Дешифрування</h2>
+
+        <div class="input-group">
+            <label><strong>Файл даних:</strong></label>
+            <input type="file" id="dataFile">
+        </div>
+
+        <div class="input-group">
+            <label><strong>Файл ключа (.pem):</strong></label>
+            <input type="file" id="keyFile" title="Для шифрування потрібен public_key.pem, для дешифрування - private_key.pem">
+            <small style="color: gray;">* Для шифрування оберіть public_key.pem, для дешифрування - private_key.pem</small>
+        </div>
+
+        <div class="row">
+            <button onclick="processRsaFile('encrypt')">Шифрувати</button>
+            <button onclick="processRsaFile('decrypt')" class="btn-success">Дешифрувати</button>
+        </div>
+    </div>
+
+    <script>
+        async function generateKeys() {
+            const res = await fetch('/api/lab4/generate_keys', { method: 'POST' });
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'rsa_keys.zip';
+                a.click();
+            } else {
+                alert("Помилка при генерації ключів");
+            }
+        }
+
+        async function processRsaFile(action) {
+            const dataFile = document.getElementById('dataFile').files[0];
+            const keyFile = document.getElementById('keyFile').files[0];
+
+            if (!dataFile || !keyFile) return alert('Оберіть файл з даними та файл ключа!');
+
+            const formData = new FormData();
+            formData.append('file', dataFile);
+            formData.append('key_file', keyFile);
+            formData.append('action', action);
+
+            const res = await fetch('/api/lab4/process', { method: 'POST', body: formData });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = (action === 'encrypt' ? 'enc_' : 'dec_') + dataFile.name;
+                a.click();
+            } else {
+                const errorText = await res.text();
+                alert(errorText);
+            }
+        }
+    </script>
+</body>
+</html>
