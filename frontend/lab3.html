@@ -66,16 +66,16 @@
     <script>
         async function processFile(action) {
             const fileInput = document.getElementById('fileInput').files[0];
-            const pwd = document.getElementById('password').value;
+            const pass_phrase = document.getElementById('password').value;
             const w = document.getElementById('paramW').value;
             const r = document.getElementById('paramR').value;
             const b = document.getElementById('paramB').value;
 
-            if (!fileInput || !pwd) return alert('Оберіть файл та введіть пароль!');
+            if (!fileInput || !pass_phrase) return alert('Оберіть файл та введіть пароль!');
 
             const formData = new FormData();
             formData.append('file', fileInput);
-            formData.append('pwd', pwd);
+            formData.append('pass_phrase', pass_phrase);
             formData.append('w', w);
             formData.append('r', r);
             formData.append('b', b);

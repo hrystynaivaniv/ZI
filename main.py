@@ -131,7 +131,7 @@ def run_lab2_standard_tests():
 @app.post("/api/lab3/process")
 async def process_lab3_file(
         file: UploadFile = File(...),
-        pwd: str = Form(...),
+        pass_phrase: str = Form(...),
         w: int = Form(...),
         r: int = Form(...),
         b: int = Form(...),
@@ -141,9 +141,9 @@ async def process_lab3_file(
 
     try:
         if action == "encrypt":
-            result_data = encrypt_file_data(content, w, r, b, pwd)
+            result_data = encrypt_file_data(content, w, r, b, pass_phrase)
         else:
-            result_data = decrypt_file_data(content, w, r, b, pwd)
+            result_data = decrypt_file_data(content, w, r, b, pass_phrase)
 
         return Response(content=result_data, media_type="application/octet-stream")
     except Exception as e:
