@@ -13,7 +13,7 @@
         button:hover { background: #0056b3; }
         .btn-success { background: #28a745; }
         .btn-success:hover { background: #218838; }
-        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        a { text-decoration: none; color: #0056b3; font-weight: bold; margin-bottom: 15px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -29,14 +29,14 @@
         <h2>Крок 2: Шифрування / Дешифрування</h2>
 
         <div class="input-group">
-            <label><strong>Файл даних:</strong></label>
+            <label for="dataFile"><strong>Файл даних:</strong></label>
             <input type="file" id="dataFile">
         </div>
 
         <div class="input-group">
-            <label><strong>Файл ключа (.pem):</strong></label>
+            <label for="keyFile"><strong>Файл ключа (.pem):</strong></label>
             <input type="file" id="keyFile" title="Для шифрування потрібен public_key.pem, для дешифрування - private_key.pem">
-            <small style="color: gray;">* Для шифрування оберіть public_key.pem, для дешифрування - private_key.pem</small>
+            <small style="color: #495057;">* Для шифрування оберіть public_key.pem, для дешифрування - private_key.pem</small>
         </div>
 
         <div class="row">

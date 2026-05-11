@@ -11,7 +11,7 @@
         button { padding: 12px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; margin-top: 10px; }
         button:hover { background: #0056b3; }
         pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; border-left: 4px solid #007BFF; }
-        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        a { text-decoration: none; color: #0056b3; font-weight: bold; margin-bottom: 15px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -21,20 +21,21 @@
         <h2>Алгоритм хешування MD5</h2>
 
         <div class="input-group">
-            <label><strong>Хешування тексту:</strong></label>
+            <label for="customText"><strong>Хешування тексту:</strong></label>
             <input type="text" id="customText" placeholder="Введіть текст">
             <button onclick="hashText()">Отримати хеш</button>
         </div>
 
        <div class="input-group">
-            <label><strong>Хешування файлу:</strong></label>
+            <label for="fileInput"><strong>Хешування файлу:</strong></label>
             <input type="file" id="fileInput">
             <button onclick="hashFile()">Отримати хеш файлу</button>
         </div>
 
         <div class="input-group">
-            <label><strong>Перевірка цілісності за файлом-хешем:</strong></label>
+            <label for="targetFile"><strong>Файл для перевірки цілісності:</strong></label>
             <input type="file" id="targetFile" title="Оберіть файл для перевірки">
+            <label for="hashFile"><strong>Файл з MD5 хешем (.txt):</strong></label>
             <input type="file" id="hashFile" title="Оберіть файл .txt із MD5 хешем">
             <button onclick="verifyWithHashFile()">Перевірити цілісність</button>
         </div>

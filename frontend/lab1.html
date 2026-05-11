@@ -12,7 +12,7 @@
         button { padding: 12px; width: 100%; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; }
         button:hover { background: #0056b3; }
         pre { background: #f4f4f4; padding: 15px; overflow-x: auto; border-radius: 5px; border-left: 4px solid #007BFF; }
-        a { text-decoration: none; color: #007BFF; font-weight: bold; margin-bottom: 15px; display: inline-block; }
+        a { text-decoration: none; color: #0056b3; font-weight: bold; margin-bottom: 15px; display: inline-block; }
     </style>
 </head>
 <body>
@@ -31,7 +31,7 @@
         </div>
 
         <div class="input-group">
-            <label><strong>Введіть кількість чисел (N):</strong></label>
+            <label for="count"><strong>Введіть кількість чисел (N):</strong></label>
             <input type="number" id="count" value="10000">
         </div>
 
@@ -50,7 +50,7 @@
             btn.disabled = true;
 
             const payload = {
-                count: parseInt(document.getElementById('count').value)
+                count: Number.parseInt(document.getElementById('count').value, 10)
             };
 
             try {
